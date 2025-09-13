@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TurnosPadel</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TurnosPadel.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TurnosPadel</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+
+                        @* Menú adicional para Admin *@
+                        @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminMenuDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="Index">Todos los Usuarios</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="Socios">Socios del Club</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="Jugadores">Jugadores de Afuera</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Usuarios" asp-action="TurnosReservados">Turnos Reservados</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Usuarios" asp-action="TurnosLibres">Turnos Libres</a>
+                            </li>
+                            <a class="nav-link" asp-controller="Usuarios" asp-action="AsignarTurno">
+                                Asignar Turno Manualmente
+                            </a>
+                        }
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            if(User.IsInRole("Socio") || (User.IsInRole("Jugador")))
+                            {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Turnos" asp-action="MisTurnos">Mis Turnos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Turnos" asp-action="TurnosLibres">Turnos Libres</a>
+                            </li>
+
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link">Hola, @User.Identity.Name!</span>
+                            </li>
+                            <li class="nav-item">
+                                <form method="post" asp-controller="Login" asp-action="Logout" id="logoutForm" class="form-inline">
+                                    <button type="submit" class="btn btn-link nav-link" style="cursor:pointer;">Cerrar sesión</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Login" asp-action="Index">Iniciar sesión</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Login" asp-action="Registrar">Registrarse</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - TurnosPadel - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

@@ -1,0 +1,27 @@
+﻿@model List<Turno>
+
+<h2>Turnos Reservados</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Cancha</th>
+            <th>¿Es Fijo?</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var turno in Model)
+        {
+            <tr>
+                <td>@turno.Usuario?.NombreCompleto</td>
+                <td>@turno.Fecha.ToShortDateString()</td>
+                <td>@turno.HoraInicio</td>
+                <td>@turno.Cancha</td>
+                <td>@(turno.EsFijo ? "Sí" : "No")</td>
+            </tr>
+        }
+    </tbody>
+</table>

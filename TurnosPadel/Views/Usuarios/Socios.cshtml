@@ -1,0 +1,52 @@
+﻿@model IEnumerable<TurnosPadel.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Socios del Club";
+}
+
+<h1>Socios del Club</h1>
+
+<p>
+    <a asp-action="Create">Agregar Nuevo Socio</a> |
+    <a asp-action="Index">Volver al listado general</a>
+    <form id="formImportar" asp-action="ImportarExcel" asp-controller="Usuarios" enctype="multipart/form-data" method="post">
+        <input type="file" id="archivoExcel" name="archivoExcel" accept=".xlsx,.xls" style="display:none;" />
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('archivoExcel').click();">Importar Socios desde Excel</button>
+    </form>
+    <script>
+        document.getElementById('archivoExcel').addEventListener('change', function () {
+            if (this.files.length > 0) {
+                document.getElementById('formImportar').submit();
+            }
+        });
+    </script>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.NombreCompleto)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.numerotel)</th>
+            <th>@Html.DisplayNameFor(model => model.Rol)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(m => item.NombreCompleto)</td>
+                <td>@Html.DisplayFor(m => item.Email)</td>
+                <td>@Html.DisplayFor(m => item.numerotel)</td>
+                <td>@Html.DisplayFor(m => item.Rol)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

@@ -1,0 +1,30 @@
+﻿@model List<Turno>
+
+<h2>Turnos Libres</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Cancha</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var turno in Model)
+        {
+            <tr>
+                <td>@turno.Fecha.ToShortDateString()</td>
+                <td>@turno.HoraInicio</td>
+                <td>@turno.Cancha</td>
+                <td>
+                    <form asp-action="ReservarManual" asp-controller="Usuarios" method="post">
+                        <input type="hidden" name="id" value="@turno.Id" />
+                        <button type="submit" class="btn btn-sm btn-success">Reservar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

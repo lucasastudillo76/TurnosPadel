@@ -1,0 +1,39 @@
+﻿@model IEnumerable<TurnosPadel.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Jugadores de Afuera";
+}
+
+<h1>Jugadores de Afuera</h1>
+
+<p>
+    <a asp-action="Index">Volver al listado general</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.NombreCompleto)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.numerotel)</th>
+            <th>@Html.DisplayNameFor(model => model.Rol)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(m => item.NombreCompleto)</td>
+                <td>@Html.DisplayFor(m => item.Email)</td>
+                <td>@Html.DisplayFor(m => item.numerotel)</td>
+                <td>@Html.DisplayFor(m => item.Rol)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

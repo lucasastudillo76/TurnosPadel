@@ -1,0 +1,21 @@
+﻿@model TurnosPadel.Models.Turno
+@{
+    ViewData["Title"] = "Reservar Turno";
+}
+
+<h2>Reservar Turno</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Detalles del Turno</h5>
+        <p><strong>Fecha:</strong> @Model.Fecha.ToShortDateString()</p>
+        <p><strong>Hora:</strong> @Model.HoraInicio</p>
+        <p><strong>Cancha:</strong> @Model.Cancha</p>
+        <p><strong>Es Fijo:</strong> @(Model.EsFijo ? "Sí" : "No")</p>
+
+        <form asp-action="ConfirmarReserva" asp-route-id="@Model.Id" method="post">
+            <button class="btn btn-success">Confirmar Reserva</button>
+            <a asp-action="TurnosLibres" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

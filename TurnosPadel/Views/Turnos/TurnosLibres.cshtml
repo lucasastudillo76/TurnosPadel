@@ -1,0 +1,37 @@
+﻿@model IEnumerable<TurnosPadel.Models.Turno>
+@{
+    ViewData["Title"] = "Turnos Libres";
+}
+
+<h2>Turnos Libres</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Cancha</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var turno in Model)
+        {
+            <tr>
+                <td>@turno.Fecha.ToShortDateString()</td>
+                <td>@turno.HoraInicio</td>
+                <td>@turno.Cancha</td>
+                <td>
+                    <form asp-controller="Turnos" asp-action="Reservar" asp-route-id="@turno.Id" method="post">
+                        <button type="submit" class="btn btn-success btn-sm">Reservar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

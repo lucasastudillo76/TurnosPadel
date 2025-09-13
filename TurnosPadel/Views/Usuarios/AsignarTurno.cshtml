@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Asignar Turno";
+    var turnos = ViewBag.Turnos as List<TurnosPadel.Models.Turno>;
+    var usuarios = ViewBag.Usuarios as List<TurnosPadel.Models.Usuario>;
+}
+
+<h2>Asignar Turno a Usuario</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success">@TempData["Mensaje"]</div>
+}
+
+<form asp-action="AsignarTurno" method="post">
+    <div class="form-group mb-3">
+        <label>Seleccioná un turno libre:</label>
+        <select class="form-control" name="turnoId" required>
+            <option value="">-- Elegir Turno --</option>
+            @foreach (var turno in turnos)
+            {
+                <option value="@turno.Id">
+                    @turno.Fecha.ToShortDateString() - @turno.HoraInicio - Cancha @turno.Cancha
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label>Seleccioná un usuario:</label>
+        <select class="form-control" name="usuarioId" required>
+            <option value="">-- Elegir Usuario --</option>
+            @foreach (var user in usuarios)
+            {
+                <option value="@user.Id">@user.NombreCompleto - @user.Email</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Asignar Turno</button>
+</form>
