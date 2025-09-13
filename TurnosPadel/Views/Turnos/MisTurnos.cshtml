@@ -36,6 +36,11 @@
                     <form asp-action="Cancelar" asp-route-id="@turno.Id" method="post">
                         <button class="btn btn-danger btn-sm">Cancelar</button>
                     </form>
+
+                    <form asp-controller="Turnos" asp-action="CancelarPorHoy" asp-route-id="@turno.Id" method="post" style="display:inline-block;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-warning btn-sm mt-1">Cancelar por hoy</button>
+                    </form>
                 </td>
             </tr>
         }

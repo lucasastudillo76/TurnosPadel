@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TurnosPadel.Data;
 
@@ -11,9 +12,11 @@ using TurnosPadel.Data;
 namespace TurnosPadel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250913150310_PaseCanchaaString")]
+    partial class PaseCanchaaString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,7 +49,7 @@ namespace TurnosPadel.Migrations
                     b.Property<TimeSpan>("HoraInicio")
                         .HasColumnType("time");
 
-                    b.Property<int?>("UsuarioId")
+                    b.Property<int>("UsuarioId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -95,7 +98,8 @@ namespace TurnosPadel.Migrations
                     b.HasOne("TurnosPadel.Models.Usuario", "Usuario")
                         .WithMany("Turnos")
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Usuario");
                 });

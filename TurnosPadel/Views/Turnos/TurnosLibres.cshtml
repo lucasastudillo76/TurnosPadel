@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<TurnosPadel.Models.Turno>
+
 @{
     ViewData["Title"] = "Turnos Libres";
 }
@@ -10,6 +11,22 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-success">@TempData["Mensaje"]</div>
+}
+
+<p>
+    <b>Tener en cuenta que si reserva un turno fijo será para todas las semanas, si usted un día no asiste sin previo aviso de 12hs, deberá abonar el valor del turno.</b>
+</p>
+
+<form asp-action="TurnosLibres" method="get" class="mb-3">
+    <label for="fechaSeleccionada">Seleccioná una fecha:</label>
+    <input type="date" name="fechaSeleccionada" class="form-control"
+           value="@ViewBag.FechaSeleccionada" style="max-width: 200px; display: inline-block; margin-right: 10px;" />
+    <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+</form>
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -20,18 +37,35 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var turno in Model)
+        @if (Model.Any())
+        {
+            foreach (var turno in Model)
+            {
+                <tr>
+                    <td>@turno.Fecha.ToString("dd/MM/yyyy")</td>
+                    <td>@turno.HoraInicio.ToString(@"hh\:mm")</td>
+                    <td>@turno.Cancha</td>
+                    <td>
+                        <form asp-controller="Turnos" asp-action="Reservar" asp-route-id="@turno.Id" method="post" style="display:inline-block;">
+                            @Html.AntiForgeryToken()
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="esFijo" value="true" id="esFijo-@turno.Id" />
+                                <label class="form-check-label" for="esFijo-@turno.Id">
+                                    Reservar fijo (todas las semanas)
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm mt-1">Reservar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@turno.Fecha.ToShortDateString()</td>
-                <td>@turno.HoraInicio</td>
-                <td>@turno.Cancha</td>
-                <td>
-                    <form asp-controller="Turnos" asp-action="Reservar" asp-route-id="@turno.Id" method="post">
-                        <button type="submit" class="btn btn-success btn-sm">Reservar</button>
-                    </form>
-                </td>
+                <td colspan="4" class="text-center">No hay turnos disponibles.</td>
             </tr>
         }
     </tbody>
 </table>
+

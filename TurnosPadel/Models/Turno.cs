@@ -18,13 +18,12 @@ namespace TurnosPadel.Models
         public TimeSpan Duracion { get; set; } = TimeSpan.FromMinutes(90);  // Duración por defecto 1:30
 
         [Required]
-        public int? Cancha { get; set; }
+        public string Cancha { get; set; }
 
         [Required]
         public bool EsFijo { get; set; }  // Si es un turno recurrente o fijo
 
-        // FK y navegación
-        [Required]
+        // FK y navegación        
         public int? UsuarioId { get; set; }
         public Usuario Usuario { get; set; }
     }

@@ -17,40 +17,28 @@ namespace TurnosPadel.Controllers
             _context = context;
         }
 
-        // GET: Turnos
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Turnos.Include(t => t.Usuario);
             return View(await appDbContext.ToListAsync());
         }
 
-        // GET: Turnos/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var turno = await _context.Turnos
-                .Include(t => t.Usuario)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (turno == null)
-            {
-                return NotFound();
-            }
+            var turno = await _context.Turnos.Include(t => t.Usuario).FirstOrDefaultAsync(m => m.Id == id);
+            if (turno == null) return NotFound();
 
             return View(turno);
         }
 
-        // GET: Turnos/Create
         public IActionResult Create()
         {
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "ContraseñaHash");
+            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Email");
             return View();
         }
 
-        // POST: Turnos/Create        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Fecha,HoraInicio,Duracion,EsFijo,UsuarioId")] Turno turno)
@@ -61,36 +49,26 @@ namespace TurnosPadel.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "ContraseñaHash", turno.UsuarioId);
+            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Email", turno.UsuarioId);
             return View(turno);
         }
 
-        // GET: Turnos/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var turno = await _context.Turnos.FindAsync(id);
-            if (turno == null)
-            {
-                return NotFound();
-            }
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "ContraseñaHash", turno.UsuarioId);
+            if (turno == null) return NotFound();
+
+            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Email", turno.UsuarioId);
             return View(turno);
         }
 
-        // POST: Turnos/Edit/5       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Fecha,HoraInicio,Duracion,EsFijo,UsuarioId")] Turno turno)
         {
-            if (id != turno.Id)
-            {
-                return NotFound();
-            }
+            if (id != turno.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -101,41 +79,26 @@ namespace TurnosPadel.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TurnoExists(turno.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!TurnoExists(turno.Id)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "ContraseñaHash", turno.UsuarioId);
+
+            ViewData["UsuarioId"] = new SelectList(_context.Usuarios, "Id", "Email", turno.UsuarioId);
             return View(turno);
         }
 
-        // GET: Turnos/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var turno = await _context.Turnos
-                .Include(t => t.Usuario)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (turno == null)
-            {
-                return NotFound();
-            }
+            var turno = await _context.Turnos.Include(t => t.Usuario).FirstOrDefaultAsync(m => m.Id == id);
+            if (turno == null) return NotFound();
 
             return View(turno);
         }
 
-        // POST: Turnos/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -144,46 +107,63 @@ namespace TurnosPadel.Controllers
             if (turno != null)
             {
                 _context.Turnos.Remove(turno);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-        
-        // 👤 Ver mis turnos reservados
+
         [Authorize(Roles = "Socio,Jugador")]
         public async Task<IActionResult> MisTurnos()
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
-
             if (usuario == null) return Unauthorized();
 
             var turnos = await _context.Turnos
                 .Where(t => t.UsuarioId == usuario.Id)
                 .OrderBy(t => t.Fecha)
+                .ThenBy(t => t.HoraInicio)
                 .ToListAsync();
 
             return View(turnos);
         }
 
-        // 📅 Ver turnos libres
         [Authorize(Roles = "Socio,Jugador")]
-        public async Task<IActionResult> TurnosLibres()
+        public async Task<IActionResult> TurnosLibres(DateTime? fechaSeleccionada)
         {
-            var turnos = await _context.Turnos
-                .Where(t => t.UsuarioId == null)
+            // Si no se ha seleccionado una fecha, mostramos los turnos de hoy
+            if (!fechaSeleccionada.HasValue)
+            {
+                fechaSeleccionada = DateTime.Today;
+            }
+
+            // Generar turnos para los próximos días si es necesario
+            GenerarTurnosParaProximosDias(14);
+
+            // Filtro para mostrar turnos solo del día seleccionado y después de la hora actual con un margen de 30 minutos
+            var turnosQuery = _context.Turnos
+                .Where(t => t.UsuarioId == null && t.Fecha.Date == fechaSeleccionada.Value.Date
+                            && t.Fecha.AddMinutes(t.HoraInicio.Hours * 60 + t.HoraInicio.Minutes) > DateTime.Now.AddMinutes(30));
+
+            var turnos = await turnosQuery
                 .OrderBy(t => t.Fecha)
+                .ThenBy(t => t.HoraInicio)
                 .ToListAsync();
+
+            // Enviar la fecha seleccionada a la vista
+            ViewBag.FechaSeleccionada = fechaSeleccionada?.ToString("yyyy-MM-dd");
 
             return View(turnos);
         }
 
-        // ✅ Reservar turno
-        [HttpPost]
+
+
+        // ✅ Reservar turno - RUTA UNICA para evitar AmbiguousMatch
+        [HttpPost("Turnos/Reservar/{id}")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Socio,Jugador")]
-        public async Task<IActionResult> Reservar(int id)
+        public async Task<IActionResult> Reservar(int id, [FromForm] bool esFijo)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
@@ -196,39 +176,44 @@ namespace TurnosPadel.Controllers
                 return RedirectToAction(nameof(TurnosLibres));
             }
 
-            turno.UsuarioId = usuario.Id;
-            await _context.SaveChangesAsync();
-
-            TempData["Mensaje"] = "Turno reservado correctamente.";
-            return RedirectToAction(nameof(MisTurnos));
-        }
-
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Socio,Jugador")]
-        public async Task<IActionResult> ConfirmarReserva(int id)
-        {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
-            if (usuario == null) return Unauthorized();
-
-            var turno = await _context.Turnos.FindAsync(id);
-            if (turno == null || turno.UsuarioId != null)
+            if (string.IsNullOrWhiteSpace(turno.Cancha))
             {
-                TempData["Error"] = "El turno ya fue reservado.";
+                TempData["Error"] = "El turno no tiene asignada una cancha.";
                 return RedirectToAction(nameof(TurnosLibres));
             }
 
             turno.UsuarioId = usuario.Id;
+            turno.EsFijo = esFijo;
+
+            Console.WriteLine($"[RESERVA] Turno reservado: ID={id}, EsFijo={esFijo}");
+
+            if (esFijo)
+            {
+                for (int i = 1; i <= 11; i++)
+                {
+                    Console.WriteLine($"[RESERVA] Creando turno fijo adicional: semana {i}");
+                    var nuevoTurno = new Turno
+                    {
+                        Fecha = turno.Fecha.AddDays(7 * i),
+                        HoraInicio = turno.HoraInicio,
+                        Duracion = turno.Duracion,
+                        Cancha = turno.Cancha,
+                        EsFijo = true,
+                        UsuarioId = usuario.Id
+                    };
+                    _context.Turnos.Add(nuevoTurno);
+                }
+            }
+
             await _context.SaveChangesAsync();
 
-            TempData["Mensaje"] = "Turno reservado exitosamente.";
+            TempData["Mensaje"] = esFijo
+                ? "Turno fijo reservado para las próximas semanas."
+                : "Turno reservado correctamente.";
+
             return RedirectToAction(nameof(MisTurnos));
         }
 
-
-        // ❌ Cancelar turno
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Socio,Jugador")]
@@ -250,8 +235,82 @@ namespace TurnosPadel.Controllers
 
             TempData["Mensaje"] = "Turno cancelado correctamente.";
             return RedirectToAction(nameof(MisTurnos));
-        }    
+        }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Socio,Jugador")]
+        public async Task<IActionResult> CancelarPorHoy(int id)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
+            if (usuario == null) return Unauthorized();
+
+            var turno = await _context.Turnos.FindAsync(id);
+            if (turno == null || turno.UsuarioId != usuario.Id)
+            {
+                TempData["Error"] = "No puedes cancelar este turno.";
+                return RedirectToAction(nameof(MisTurnos));
+            }
+
+            // Solo eliminar el turno actual, no los futuros fijos
+            turno.UsuarioId = null;
+
+            // Guardar cambios en la base de datos
+            await _context.SaveChangesAsync();
+
+            TempData["Mensaje"] = "Turno cancelado por hoy.";
+            return RedirectToAction(nameof(MisTurnos));
+        }
+
+
+        private void GenerarTurnosParaProximosDias(int cantidadDias)
+        {
+            var hoy = DateTime.Today;
+
+            var horarios = new List<TimeSpan>
+            {
+                new TimeSpan(14, 0, 0),
+                new TimeSpan(15, 30, 0),
+                new TimeSpan(17, 0, 0),
+                new TimeSpan(18, 30, 0),
+                new TimeSpan(20, 0, 0),
+                new TimeSpan(21, 30, 0),
+                new TimeSpan(23, 0, 0)
+            };
+
+            var canchas = new List<string> { "Cancha 1" };
+
+            for (int i = 0; i < cantidadDias; i++)
+            {
+                var fecha = hoy.AddDays(i);
+
+                foreach (var hora in horarios)
+                {
+                    foreach (var cancha in canchas)
+                    {
+                        var existe = _context.Turnos.Any(t =>
+                            t.Fecha == fecha &&
+                            t.HoraInicio == hora &&
+                            t.Cancha == cancha);
+
+                        if (!existe)
+                        {
+                            _context.Turnos.Add(new Turno
+                            {
+                                Fecha = fecha,
+                                HoraInicio = hora,
+                                Duracion = TimeSpan.FromMinutes(90),
+                                Cancha = cancha,
+                                EsFijo = false
+                            });
+                        }
+                    }
+                }
+            }
+
+            _context.SaveChanges();
+        }
 
         private bool TurnoExists(int id)
         {
