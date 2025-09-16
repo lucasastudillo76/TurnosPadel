@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<TurnosPadel.Models.Turno>
+
 @{
     ViewData["Title"] = "Mis Turnos";
 }
@@ -21,7 +22,8 @@
             <th>Hora</th>
             <th>Cancha</th>
             <th>Fijo</th>
-            <th>Acción</th>
+            <th>Pago</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -33,14 +35,36 @@
                 <td>@turno.Cancha</td>
                 <td>@(turno.EsFijo ? "Sí" : "No")</td>
                 <td>
-                    <form asp-action="Cancelar" asp-route-id="@turno.Id" method="post">
-                        <button class="btn btn-danger btn-sm">Cancelar</button>
-                    </form>
+                    @if (turno.EstaPagado)
+                    {
+                        <span class="badge bg-success">Pagado</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    }
+                </td>
+                <td>
+                    @if (turno.EsFijo)
+                    {
+                        <form asp-controller="Turnos" asp-action="CancelarFijo" asp-route-id="@turno.Id" method="post" style="display:inline-block;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger btn-sm">Cancelar fijo</button>
+                        </form>
+                    }
 
                     <form asp-controller="Turnos" asp-action="CancelarPorHoy" asp-route-id="@turno.Id" method="post" style="display:inline-block;">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-warning btn-sm mt-1">Cancelar por hoy</button>
                     </form>
+
+                    @if (!turno.EstaPagado)
+                    {
+                        <a href="@Url.Action("CrearPago", "Pago", new { turnoId = turno.Id })"
+                           class="btn btn-primary btn-sm mt-1">
+                            Pagar con Mercado Pago
+                        </a>
+                    }
                 </td>
             </tr>
         }

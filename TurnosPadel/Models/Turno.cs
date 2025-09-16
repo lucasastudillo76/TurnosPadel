@@ -23,6 +23,8 @@ namespace TurnosPadel.Models
         [Required]
         public bool EsFijo { get; set; }  // Si es un turno recurrente o fijo
 
+        public bool EstaPagado { get; set;}
+
         // FK y navegación        
         public int? UsuarioId { get; set; }
         public Usuario Usuario { get; set; }

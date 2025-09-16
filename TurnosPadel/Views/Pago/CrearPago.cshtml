@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Pago del Turno";
+    var preferenceId = ViewBag.PreferenceId as string;
+    var publicKey = ViewBag.PublicKey as string;
+    var monto = ViewBag.Monto ?? 16000; // Podés pasar ViewBag.Monto desde el controlador si lo querés dinámico
+}
+
+<h2>Confirmar y Pagar el Turno</h2>
+<p>Monto: <strong>$@monto</strong></p>
+
+@if (!string.IsNullOrEmpty(preferenceId) && !string.IsNullOrEmpty(publicKey))
+{
+    <div id="wallet_container" class="my-3"></div>
+
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script>
+        const mp = new MercadoPago('@publicKey', {
+            locale: 'es-AR'
+        });
+
+        mp.checkout({
+            preference: {
+                id: '@preferenceId'
+            },
+            render: {
+                container: '#wallet_container',
+                label: 'Pagar $@monto'
+            }
+        });
+    </script>
+}
+else
+{
+    <div class="alert alert-danger">No se pudo cargar el botón de pago.</div>
+}

@@ -48,14 +48,11 @@
                     <td>
                         <form asp-controller="Turnos" asp-action="Reservar" asp-route-id="@turno.Id" method="post" style="display:inline-block;">
                             @Html.AntiForgeryToken()
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="esFijo" value="true" id="esFijo-@turno.Id" />
-                                <label class="form-check-label" for="esFijo-@turno.Id">
-                                    Reservar fijo (todas las semanas)
-                                </label>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-sm mt-1">Reservar</button>
+
+                            <button type="submit" name="esFijo" value="false" class="btn btn-success btn-sm">Reservar</button>
+                            <button type="submit" name="esFijo" value="true" class="btn btn-info btn-sm">Reservar fijo</button>
                         </form>
+
                     </td>
                 </tr>
             }

@@ -15,8 +15,24 @@ namespace TurnosPadel.Controllers
 
         public IActionResult Index()
         {
+            var disciplinas = new List<(string nombre, string imagen)>
+    {
+        ("Padel", "fotopadel.jpg"),
+        ("Tenis", "fotocanchatenis.jpeg"),
+        ("Fútbol", "canchafutbol.jpeg"),
+        ("Patin", "fotopatin.jpg"),
+        ("Bochas", "canchabochas.jpg"),
+        ("Natacion", "piletanatacion.jpg"),
+        ("Voley", "canchavoley.jpg")
+    };
+
+            // Pasamos la lista de disciplinas a la vista
+            ViewData["Disciplinas"] = disciplinas;
+
             return View();
         }
+
+
 
         public IActionResult Privacy()
         {

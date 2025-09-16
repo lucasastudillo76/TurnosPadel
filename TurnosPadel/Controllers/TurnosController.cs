@@ -216,27 +216,37 @@ namespace TurnosPadel.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Socio,Jugador")]
-        public async Task<IActionResult> Cancelar(int id)
+        [Authorize(Roles = "Socio,Jugador")]       
+        public async Task<IActionResult> CancelarFijo(int id)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
-            if (usuario == null) return Unauthorized();
-
             var turno = await _context.Turnos.FindAsync(id);
-            if (turno == null || turno.UsuarioId != usuario.Id)
+            if (turno == null)
             {
-                TempData["Error"] = "No puedes cancelar este turno.";
-                return RedirectToAction(nameof(MisTurnos));
+                TempData["Error"] = "Turno no encontrado.";
+                return RedirectToAction("MisTurnos");
             }
 
-            turno.UsuarioId = null;
+            if (!turno.EsFijo)
+            {
+                TempData["Error"] = "Este turno no es fijo.";
+                return RedirectToAction("MisTurnos");
+            }
+
+            // Buscar todos los turnos fijos iguales
+            var turnosRelacionados = await _context.Turnos
+                .Where(t => t.UsuarioId == turno.UsuarioId &&
+                            t.Cancha == turno.Cancha &&
+                            t.HoraInicio == turno.HoraInicio &&
+                            t.EsFijo &&
+                            t.Fecha >= DateTime.Today)
+                .ToListAsync();
+
+            _context.Turnos.RemoveRange(turnosRelacionados);
             await _context.SaveChangesAsync();
 
-            TempData["Mensaje"] = "Turno cancelado correctamente.";
-            return RedirectToAction(nameof(MisTurnos));
+            TempData["Mensaje"] = "Se cancelaron todos los turnos fijos relacionados.";
+            return RedirectToAction("MisTurnos");
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Socio,Jugador")]

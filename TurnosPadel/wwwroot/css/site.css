@@ -1,22 +1,52 @@
-html {
-  font-size: 14px;
+﻿html {
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+/* ✅ Carrusel con imágenes ajustadas */
+.carousel-inner {
+    height: 400px; /* Altura fija para escritorio */
+    overflow: hidden;
+    background-color: #000; /* Fondo opcional para imágenes más chicas */
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 🔥 llena todo el espacio */
+    display: block;
+    margin: 0 auto;
+}
+
+/* ✅ Ajustes responsivos */
+@media (max-width: 768px) {
+    .carousel-inner {
+        height: 250px; /* Menor altura en mobile */
+    }
+
+    .carousel-item img {
+        object-fit: cover;
+    }
 }
